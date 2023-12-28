@@ -12,6 +12,11 @@ class Author(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     # Add validators 
+    @validates('phone_number')
+    def validate_phone_number(self, key, value):
+        if value and not value.isdigit():
+            raise ValueError("Phone number must contain only digits.")
+        return value 
 
     def __repr__(self):
         return f'Author(id={self.id}, name={self.name})'
@@ -28,7 +33,24 @@ class Post(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
     # Add validators  
+    @validates('title')
+    def validate_title(self, key, value):
+        clickbait_keywords = ["Won't Believe", "Secret", "Top", "Guess"]
+        if not any(keyword in value for keyword in clickbait_keywords):
+            raise ValueError("Title must contain one of the following: 'Won't Believe', 'Secret', 'Top', 'Guess'")
+        return value
 
+    @validates('content')
+    def validate_content(self, key, value):
+        if len(value) < 250:
+            raise ValueError("Content must be at least 250 characters long.")
+        return value
+
+    @validates('summary')
+    def validate_summary(self, key, value):
+        if value and len(value) > 250:
+            raise ValueError("Summary must be a maximum of 250 characters.")
+        return value
 
     def __repr__(self):
         return f'Post(id={self.id}, title={self.title} content={self.content}, summary={self.summary})'
